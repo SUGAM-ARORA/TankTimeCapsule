@@ -11,7 +11,7 @@
     "backend": "go run backend/*.go"
   },
   "dependencies": {
-    "@libsql/client": "^0.5.6",
+    "@libsql/client": "^0.15.0",
     "axios": "^1.6.7",
     "framer-motion": "^11.0.3",
     "lucide-react": "^0.344.0",
