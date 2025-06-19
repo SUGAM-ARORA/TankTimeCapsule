@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { api } from '../lib/api';
+import { supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
 interface Profile {
   id: string;
@@ -10,7 +11,7 @@ interface Profile {
 }
 
 interface AuthStore {
-  user: any | null;
+  user: User | null;
   profile: Profile | null;
   loading: boolean;
   error: string | null;
@@ -21,7 +22,7 @@ interface AuthStore {
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   profile: null,
   loading: false,
@@ -30,11 +31,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signIn: async (email: string, password: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post<{ user: any; profile: Profile }>('/auth/login', { email, password });
-      const { user, profile } = response.data;
-      set({ user, profile, error: null });
-    } catch (error) {
-      set({ error: (error as Error).message, user: null, profile: null });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        set({ user: data.user });
+        // Fetch profile after successful login
+        await get().fetchProfile();
+      }
+    } catch (error: any) {
+      set({ error: error.message });
       throw error;
     } finally {
       set({ loading: false });
@@ -44,15 +54,38 @@ export const useAuthStore = create<AuthStore>((set) => ({
   signUp: async (email: string, password: string, fullName: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post<{ user: any; profile: Profile }>('/auth/register', {
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        full_name: fullName,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
-      const { user, profile } = response.data;
-      set({ user, profile, error: null });
-    } catch (error) {
-      set({ error: (error as Error).message, user: null, profile: null });
+
+      if (error) throw error;
+
+      if (data.user) {
+        set({ user: data.user });
+        
+        // Create profile record
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: fullName,
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
+
+        await get().fetchProfile();
+      }
+    } catch (error: any) {
+      set({ error: error.message });
       throw error;
     } finally {
       set({ loading: false });
@@ -61,32 +94,60 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   signOut: async () => {
     try {
-      await api.post('/auth/logout');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       set({ user: null, profile: null, error: null });
-    } catch (error) {
-      set({ error: (error as Error).message });
+    } catch (error: any) {
+      set({ error: error.message });
       throw error;
     }
   },
 
   fetchProfile: async () => {
     try {
-      const response = await api.get<{ user: any; profile: Profile }>('/auth/profile');
-      const { user, profile } = response.data;
-      set({ user, profile, error: null });
-    } catch (error) {
-      set({ error: (error as Error).message });
-      throw error;
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        set({ user });
+        
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          throw error;
+        }
+
+        if (profile) {
+          set({ profile });
+        }
+      }
+    } catch (error: any) {
+      console.error('Fetch profile error:', error);
+      set({ error: error.message });
     }
   },
 
   updateProfile: async (updates: Partial<Profile>) => {
     try {
-      const response = await api.put<{ profile: Profile }>('/auth/profile', updates);
-      const { profile } = response.data;
-      set({ profile, error: null });
-    } catch (error) {
-      set({ error: (error as Error).message });
+      const { user } = get();
+      if (!user) throw new Error('No user logged in');
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      set({ profile: data });
+    } catch (error: any) {
+      set({ error: error.message });
       throw error;
     }
   },

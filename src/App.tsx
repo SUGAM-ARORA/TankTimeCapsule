@@ -18,6 +18,7 @@ import { Comparisons } from './pages/Comparisons';
 import { useThemeStore } from './store/useThemeStore';
 import { useDealsStore } from './store/useDealsStore';
 import { useAuthStore } from './store/useAuthStore';
+import { supabase } from './lib/supabase';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -26,11 +27,34 @@ function App() {
   const { fetchProfile } = useAuthStore();
 
   useEffect(() => {
+    // Check for existing session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await fetchProfile();
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          await fetchProfile();
+        } else if (event === 'SIGNED_OUT') {
+          // Clear user data
+        }
+      }
+    );
+
+    // Fetch initial data
     fetchDeals();
     fetchSharks();
     fetchPredictions();
     fetchInsights();
-    fetchProfile();
+
+    return () => subscription.unsubscribe();
   }, [fetchDeals, fetchSharks, fetchPredictions, fetchInsights, fetchProfile]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
