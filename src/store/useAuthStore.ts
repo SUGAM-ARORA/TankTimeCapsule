@@ -80,6 +80,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
+          // Don't throw here, as the user account was created successfully
         }
 
         await get().fetchProfile();
@@ -118,7 +119,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          throw error;
+          console.error('Fetch profile error:', error);
+          // Don't throw here, just log the error
+          return;
         }
 
         if (profile) {
@@ -127,7 +130,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
     } catch (error: any) {
       console.error('Fetch profile error:', error);
-      set({ error: error.message });
+      // Don't set error state for profile fetch failures
     }
   },
 

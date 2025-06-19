@@ -145,7 +145,6 @@ export const Auth: React.FC = () => {
           <button
             onClick={() => {
               setIsSignUp(!isSignUp);
-              setError(null);
             }}
             className="text-sm text-blue-300 hover:text-blue-200 transition-colors"
           >
