@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
+import { FloatingNavigation } from './components/FloatingNavigation';
 import { Dashboard } from './pages/Dashboard';
 import { Sharks } from './pages/Sharks';
 import { Deals } from './pages/Deals';
@@ -15,12 +15,14 @@ import { Trends } from './pages/Trends';
 import { Startups } from './pages/Startups';
 import { Industries } from './pages/Industries';
 import { Comparisons } from './pages/Comparisons';
+import { LoadingScreen } from './components/LoadingScreen';
 import { useThemeStore } from './store/useThemeStore';
 import { useDealsStore } from './store/useDealsStore';
 import { useAuthStore } from './store/useAuthStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const { isDarkMode } = useThemeStore();
   const { fetchDeals, fetchSharks, fetchPredictions, fetchInsights } = useDealsStore();
   const { initialize, initialized } = useAuthStore();
@@ -43,30 +45,77 @@ function App() {
     initializeApp();
   }, [initialize, fetchDeals, fetchSharks, fetchPredictions, fetchInsights]);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleNav = () => setIsNavOpen(!isNavOpen);
 
   if (!initialized) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${
-        isDarkMode ? 'bg-[#121212] text-[#E0E0E0]' : 'bg-[#F5F5F5] text-[#5D87FF]'
-      }`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-xl">Loading Tank Time Capsule...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <Router>
-      <div className={`min-h-screen ${
-        isDarkMode ? 'bg-[#121212] text-[#E0E0E0]' : 'bg-[#F5F5F5] text-[#5D87FF]'
+      <div className={`min-h-screen transition-all duration-700 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-900'
       }`}>
-        <Navbar toggleSidebar={toggleSidebar} />
-        <Sidebar isOpen={isSidebarOpen} />
+        {/* Dynamic Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, 180, 360],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className={`absolute -top-40 -right-40 w-96 h-96 rounded-full ${
+              isDarkMode ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20' : 'bg-gradient-to-r from-blue-200/40 to-purple-200/40'
+            } blur-3xl`}
+          />
+          <motion.div
+            animate={{
+              scale: [1.3, 1, 1.3],
+              rotate: [360, 180, 0],
+              opacity: [0.4, 0.7, 0.4],
+            }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className={`absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full ${
+              isDarkMode ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20' : 'bg-gradient-to-r from-purple-200/40 to-pink-200/40'
+            } blur-3xl`}
+          />
+          <motion.div
+            animate={{
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className={`absolute top-1/2 left-1/2 w-72 h-72 rounded-full ${
+              isDarkMode ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20' : 'bg-gradient-to-r from-cyan-200/40 to-blue-200/40'
+            } blur-3xl`}
+          />
+        </div>
+
+        <Navbar toggleNav={toggleNav} />
         
-        <main className={`pt-16 ${isSidebarOpen ? 'ml-64' : 'ml-0'} transition-margin duration-300`}>
+        {/* Revolutionary Floating Navigation */}
+        <FloatingNavigation isOpen={isNavOpen} onClose={() => setIsNavOpen(false)} />
+        
+        <motion.main 
+          className="pt-20 relative z-10"
+          layout
+        >
           <div className="p-6">
             <Routes>
               <Route path="/" element={<Dashboard />} />
@@ -85,7 +134,7 @@ function App() {
               <Route path="/settings" element={<div>Settings Coming Soon</div>} />
             </Routes>
           </div>
-        </main>
+        </motion.main>
       </div>
     </Router>
   );
