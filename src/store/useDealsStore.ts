@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { fetchDeals, fetchSharks, fetchPredictions, fetchAnalytics } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 interface Deal {
   id: number;
@@ -17,68 +17,17 @@ interface Deal {
   interested_sharks: string[];
   invested_sharks: string[];
   success_status: string;
-  pitch_description: string;
-  product_category: string;
-  revenue_current: number;
-  revenue_projected: number;
-  profit_margin: number;
-  team_size: number;
-  founded_year: number;
-  location: string;
-  patent_status: string;
-  online_presence: {
-    website: string;
-    social_media: {
-      instagram: string;
-      facebook: string;
-      twitter: string;
-    };
-  };
-  post_show_status: {
-    revenue_growth: number;
-    employee_growth: number;
-    market_expansion: string[];
-    funding_rounds: {
-      round: string;
-      amount: number;
-      investors: string[];
-      date: string;
-    }[];
-  };
+  created_at: string;
 }
 
 interface Shark {
   id: string;
   name: string;
-  title: string;
-  company: string;
   total_deals: number;
   total_investment: number;
-  average_equity: number;
-  successful_exits: number;
-  industry_preference: string[];
-  investment_range: {
-    min: number;
-    max: number;
-  };
-  notable_investments: string[];
-  investment_style: string[];
-  season_appearances: number[];
-  bio: string;
-  expertise: string[];
-  education: string[];
-  achievements: string[];
-  social_media: {
-    twitter: string;
-    linkedin: string;
-    instagram: string;
-  };
-  investment_stats: {
-    by_industry: Record<string, number>;
-    by_stage: Record<string, number>;
-    success_rate: number;
-    average_return: number;
-  };
+  appearances: number[];
+  profile_image: string;
+  created_at: string;
 }
 
 interface DealsStore {
@@ -96,95 +45,8 @@ interface DealsStore {
   setSelectedSeason: (season: number) => void;
 }
 
-// Dummy data for sharks
-const dummySharks: Shark[] = [
-  {
-    id: "1",
-    name: "Ashneer Grover",
-    title: "Co-founder & Former MD",
-    company: "BharatPe",
-    total_deals: 24,
-    total_investment: 118000000,
-    average_equity: 15.5,
-    successful_exits: 3,
-    industry_preference: ["Fintech", "D2C", "Technology"],
-    investment_range: {
-      min: 1000000,
-      max: 20000000
-    },
-    notable_investments: ["Brand A", "Company B", "Startup C"],
-    investment_style: ["Aggressive", "Numbers-focused", "Quick decision maker"],
-    season_appearances: [1, 2],
-    bio: "Known for his straightforward approach and business acumen",
-    expertise: ["Fintech", "Scaling", "Operations"],
-    education: ["IIT Delhi", "IIM Ahmedabad"],
-    achievements: ["Built BharatPe", "Unicorn founder"],
-    social_media: {
-      twitter: "@Ashneer_Grover",
-      linkedin: "ashneergrover",
-      instagram: "ashneer.grover"
-    },
-    investment_stats: {
-      by_industry: {
-        "Fintech": 35,
-        "D2C": 25,
-        "Technology": 40
-      },
-      by_stage: {
-        "Seed": 40,
-        "Series A": 35,
-        "Growth": 25
-      },
-      success_rate: 75,
-      average_return: 3.2
-    }
-  },
-  {
-    id: "2",
-    name: "Namita Thapar",
-    title: "Executive Director",
-    company: "Emcure Pharmaceuticals",
-    total_deals: 28,
-    total_investment: 125000000,
-    average_equity: 12.5,
-    successful_exits: 4,
-    industry_preference: ["Healthcare", "Education", "Women-led startups"],
-    investment_range: {
-      min: 2000000,
-      max: 25000000
-    },
-    notable_investments: ["Health Tech A", "EdTech B", "Wellness C"],
-    investment_style: ["Strategic", "Long-term vision", "Mentorship-focused"],
-    season_appearances: [1, 2, 3],
-    bio: "Passionate about healthcare and women entrepreneurship",
-    expertise: ["Healthcare", "Pharmaceuticals", "Global Business"],
-    education: ["CA", "Harvard Business School"],
-    achievements: ["Built Emcure's global presence", "Forbes Business Leader"],
-    social_media: {
-      twitter: "@namitathapar",
-      linkedin: "namitathapar",
-      instagram: "namita.thapar"
-    },
-    investment_stats: {
-      by_industry: {
-        "Healthcare": 45,
-        "Education": 30,
-        "Others": 25
-      },
-      by_stage: {
-        "Seed": 30,
-        "Series A": 45,
-        "Growth": 25
-      },
-      success_rate: 82,
-      average_return: 2.8
-    }
-  },
-  // Add more sharks...
-];
-
-// Dummy data for deals
-const dummyDeals: Deal[] = [
+// Sample data for development
+const sampleDeals: Deal[] = [
   {
     id: 1,
     season: 1,
@@ -201,84 +63,148 @@ const dummyDeals: Deal[] = [
     interested_sharks: ["Ashneer Grover", "Namita Thapar"],
     invested_sharks: ["Ashneer Grover"],
     success_status: "funded",
-    pitch_description: "Innovative healthy snacks made from natural ingredients",
-    product_category: "Healthy Snacks",
-    revenue_current: 120000000,
-    revenue_projected: 300000000,
-    profit_margin: 22,
-    team_size: 45,
-    founded_year: 2019,
-    location: "Mumbai",
-    patent_status: "2 patents granted",
-    online_presence: {
-      website: "https://bluepinefoods.com",
-      social_media: {
-        instagram: "@bluepinefoods",
-        facebook: "bluepinefoods",
-        twitter: "@bluepinefoods"
-      }
-    },
-    post_show_status: {
-      revenue_growth: 150,
-      employee_growth: 200,
-      market_expansion: ["UAE", "Singapore", "UK"],
-      funding_rounds: [
-        {
-          round: "Series A",
-          amount: 100000000,
-          investors: ["Sequoia", "Tiger Global"],
-          date: "2024-01"
-        }
-      ]
-    }
+    created_at: new Date().toISOString(),
   },
-  // Add more deals...
+  {
+    id: 2,
+    season: 1,
+    episode: 2,
+    startup_name: "TechInnovate",
+    industry: "Technology",
+    ask_amount: 100000000,
+    ask_equity: 5,
+    valuation: 2000000000,
+    deal_amount: 100000000,
+    deal_equity: 6,
+    deal_debt: 0,
+    multiple_sharks: false,
+    interested_sharks: ["Peyush Bansal"],
+    invested_sharks: ["Peyush Bansal"],
+    success_status: "funded",
+    created_at: new Date().toISOString(),
+  },
 ];
 
-export const useDealsStore = create<DealsStore>((set) => ({
-  deals: dummyDeals,
-  sharks: dummySharks,
+const sampleSharks: Shark[] = [
+  {
+    id: "1",
+    name: "Ashneer Grover",
+    total_deals: 24,
+    total_investment: 118000000,
+    appearances: [1, 2],
+    profile_image: "",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    name: "Namita Thapar",
+    total_deals: 28,
+    total_investment: 125000000,
+    appearances: [1, 2, 3],
+    profile_image: "",
+    created_at: new Date().toISOString(),
+  },
+];
+
+const samplePredictions = [
+  {
+    id: 1,
+    startup_type: "Technology",
+    success_probability: 0.75,
+    recommended_sharks: ["Ashneer Grover", "Peyush Bansal"],
+    risk_factors: ["Market Competition", "Tech Adoption"],
+  },
+  {
+    id: 2,
+    startup_type: "Healthcare",
+    success_probability: 0.82,
+    recommended_sharks: ["Namita Thapar", "Vineeta Singh"],
+    risk_factors: ["Regulatory Compliance", "Market Access"],
+  },
+];
+
+const sampleInsights = [
+  {
+    id: 1,
+    title: "AI Startup Trends",
+    description: "Analysis of AI and ML startup performance in recent seasons",
+    data_points: {
+      ai_startups: 15,
+      success_rate: 0.8,
+      avg_valuation: 50000000,
+    },
+  },
+];
+
+export const useDealsStore = create<DealsStore>((set, get) => ({
+  deals: sampleDeals,
+  sharks: sampleSharks,
   selectedSeason: 1,
   loading: false,
   error: null,
-  predictions: [],
-  insights: [],
+  predictions: samplePredictions,
+  insights: sampleInsights,
 
   fetchDeals: async () => {
-    set({ loading: true });
+    set({ loading: true, error: null });
     try {
-      const data = await fetchDeals();
-      set({ deals: data || dummyDeals, error: null });
+      const { data, error } = await supabase
+        .from('deals')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Use sample data if no data in database
+      set({ deals: data && data.length > 0 ? data : sampleDeals });
     } catch (error) {
-      set({ error: (error as Error).message });
+      console.error('Error fetching deals:', error);
+      set({ error: (error as Error).message, deals: sampleDeals });
     } finally {
       set({ loading: false });
     }
   },
 
   fetchSharks: async () => {
+    set({ loading: true, error: null });
     try {
-      const data = await fetchSharks();
-      set({ sharks: data || dummySharks, error: null });
+      const { data, error } = await supabase
+        .from('sharks')
+        .select('*')
+        .order('total_investment', { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Use sample data if no data in database
+      set({ sharks: data && data.length > 0 ? data : sampleSharks });
     } catch (error) {
-      set({ error: (error as Error).message });
+      console.error('Error fetching sharks:', error);
+      set({ error: (error as Error).message, sharks: sampleSharks });
+    } finally {
+      set({ loading: false });
     }
   },
 
   fetchPredictions: async () => {
     try {
-      const data = await fetchPredictions();
-      set({ predictions: data });
+      // For now, use sample data
+      set({ predictions: samplePredictions });
     } catch (error) {
+      console.error('Error fetching predictions:', error);
       set({ error: (error as Error).message });
     }
   },
 
   fetchInsights: async () => {
     try {
-      const data = await fetchAnalytics();
-      set({ insights: data });
+      // For now, use sample data
+      set({ insights: sampleInsights });
     } catch (error) {
+      console.error('Error fetching insights:', error);
       set({ error: (error as Error).message });
     }
   },
