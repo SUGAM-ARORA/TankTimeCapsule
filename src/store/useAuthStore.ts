@@ -38,15 +38,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const { data: sessionData, error: sessionError } = await auth.getSession();
       
       // If there's an error getting the session or no valid user, clear any stale session data
-      if (sessionError || !sessionData.session?.user) {
+      if (sessionError || !sessionData?.user) {
         await auth.signOut();
         set({ user: null, profile: null, initialized: true });
         return;
       }
 
       // If we have a valid session, set the user and fetch profile
-      if (sessionData.session?.user) {
-        set({ user: sessionData.session.user });
+      if (sessionData?.user) {
+        set({ user: sessionData.user });
         await get().fetchProfile();
       }
       
