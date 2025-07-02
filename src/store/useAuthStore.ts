@@ -35,15 +35,31 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   initialize: async () => {
     try {
-      const { session } = await auth.getSession();
-      if (session?.user) {
-        set({ user: session.user });
+      const { data: sessionData, error: sessionError } = await auth.getSession();
+      
+      // If there's an error getting the session or no valid user, clear any stale session data
+      if (sessionError || !sessionData.session?.user) {
+        await auth.signOut();
+        set({ user: null, profile: null, initialized: true });
+        return;
+      }
+
+      // If we have a valid session, set the user and fetch profile
+      if (sessionData.session?.user) {
+        set({ user: sessionData.session.user });
         await get().fetchProfile();
       }
+      
       set({ initialized: true });
     } catch (error) {
       console.error('Auth initialization error:', error);
-      set({ initialized: true });
+      // Clear any stale session data on error
+      try {
+        await auth.signOut();
+      } catch (signOutError) {
+        console.error('Error clearing stale session:', signOutError);
+      }
+      set({ user: null, profile: null, initialized: true });
     }
   },
 
