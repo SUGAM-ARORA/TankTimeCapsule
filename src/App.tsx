@@ -15,9 +15,11 @@ import { Trends } from './pages/Trends';
 import { Startups } from './pages/Startups';
 import { Industries } from './pages/Industries';
 import { Comparisons } from './pages/Comparisons';
+import { LoadingScreen } from './components/LoadingScreen';
 import { useThemeStore } from './store/useThemeStore';
 import { useDealsStore } from './store/useDealsStore';
 import { useAuthStore } from './store/useAuthStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -46,28 +48,61 @@ function App() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   if (!initialized) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${
-        isDarkMode ? 'bg-[#121212] text-[#E0E0E0]' : 'bg-[#F5F5F5] text-[#5D87FF]'
-      }`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-xl">Loading Tank Time Capsule...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <Router>
-      <div className={`min-h-screen ${
-        isDarkMode ? 'bg-[#121212] text-[#E0E0E0]' : 'bg-[#F5F5F5] text-[#5D87FF]'
+      <div className={`min-h-screen transition-all duration-500 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
       }`}>
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className={`absolute -top-40 -right-40 w-80 h-80 rounded-full ${
+              isDarkMode ? 'bg-blue-500/10' : 'bg-blue-200/30'
+            } blur-3xl`}
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              rotate: [360, 180, 0],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full ${
+              isDarkMode ? 'bg-purple-500/10' : 'bg-purple-200/30'
+            } blur-3xl`}
+          />
+        </div>
+
         <Navbar toggleSidebar={toggleSidebar} />
-        <Sidebar isOpen={isSidebarOpen} />
         
-        <main className={`pt-16 ${isSidebarOpen ? 'ml-64' : 'ml-0'} transition-margin duration-300`}>
-          <div className="p-6">
+        <AnimatePresence>
+          {isSidebarOpen && <Sidebar isOpen={isSidebarOpen} />}
+        </AnimatePresence>
+        
+        <motion.main 
+          className={`pt-20 transition-all duration-300 ${
+            isSidebarOpen ? 'ml-72' : 'ml-0'
+          }`}
+          layout
+        >
+          <div className="p-6 relative z-10">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/sharks" element={<Sharks />} />
@@ -85,7 +120,7 @@ function App() {
               <Route path="/settings" element={<div>Settings Coming Soon</div>} />
             </Routes>
           </div>
-        </main>
+        </motion.main>
       </div>
     </Router>
   );

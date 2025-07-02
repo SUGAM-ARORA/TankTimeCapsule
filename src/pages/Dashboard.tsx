@@ -7,12 +7,58 @@ import {
   Table,
   Activity,
   ArrowRight,
+  Zap,
+  Target,
+  DollarSign,
+  Award,
+  Sparkles,
+  TrendingDown,
+  Eye
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useThemeStore } from '../store/useThemeStore';
-import { SeasonSelector } from '../components/SeasonSelector';
-import { PremiumFeatures } from '../components/PremiumFeatures';
-import { MLInsights } from '../components/MLInsights';
 import { useAuthStore } from '../store/useAuthStore';
+import { useDealsStore } from '../store/useDealsStore';
+
+const StatCard: React.FC<{
+  title: string;
+  value: string;
+  change: string;
+  icon: React.ReactNode;
+  color: string;
+  trend: 'up' | 'down';
+}> = ({ title, value, change, icon, color, trend }) => {
+  const { isDarkMode } = useThemeStore();
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -5 }}
+      className={`p-6 rounded-3xl backdrop-blur-xl border transition-all duration-300 ${
+        isDarkMode 
+          ? 'bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50' 
+          : 'bg-white/50 border-gray-200/50 hover:border-gray-300/50'
+      } shadow-xl hover:shadow-2xl`}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-2xl bg-gradient-to-r ${color}`}>
+          {icon}
+        </div>
+        <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm ${
+          trend === 'up' 
+            ? 'bg-green-500/20 text-green-500' 
+            : 'bg-red-500/20 text-red-500'
+        }`}>
+          {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+          <span>{change}</span>
+        </div>
+      </div>
+      <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+        {title}
+      </h3>
+      <p className="text-3xl font-bold mt-1">{value}</p>
+    </motion.div>
+  );
+};
 
 const DashboardCard: React.FC<{
   title: string;
@@ -20,117 +66,286 @@ const DashboardCard: React.FC<{
   icon: React.ReactNode;
   link: string;
   color: string;
-}> = ({ title, description, icon, link, color }) => {
+  badge?: string;
+}> = ({ title, description, icon, link, color, badge }) => {
   const { isDarkMode } = useThemeStore();
 
   return (
-    <Link
-      to={link}
-      className={`block p-6 rounded-lg transition-transform hover:scale-105 ${
-        isDarkMode ? 'bg-[#1E2A3B]' : 'bg-white'
-      } shadow-lg`}
+    <motion.div
+      whileHover={{ scale: 1.02, y: -5 }}
+      whileTap={{ scale: 0.98 }}
+      className="group"
     >
-      <div className="flex items-start justify-between">
-        <div className={`p-3 rounded-lg ${color}`}>
-          {icon}
+      <Link
+        to={link}
+        className={`block p-6 rounded-3xl backdrop-blur-xl border transition-all duration-300 ${
+          isDarkMode 
+            ? 'bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50' 
+            : 'bg-white/50 border-gray-200/50 hover:border-gray-300/50'
+        } shadow-xl hover:shadow-2xl relative overflow-hidden`}
+      >
+        {/* Background gradient effect */}
+        <div className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+        
+        <div className="flex items-start justify-between mb-4">
+          <div className={`p-3 rounded-2xl bg-gradient-to-r ${color} shadow-lg`}>
+            {icon}
+          </div>
+          {badge && (
+            <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full">
+              {badge}
+            </span>
+          )}
+          <motion.div
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            whileHover={{ x: 5 }}
+          >
+            <ArrowRight className="h-5 w-5 text-gray-400" />
+          </motion.div>
         </div>
-        <ArrowRight className="h-5 w-5 text-gray-400" />
-      </div>
-      <h3 className="mt-4 text-xl font-semibold">{title}</h3>
-      <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-        {description}
-      </p>
-    </Link>
+        
+        <h3 className="text-xl font-bold mb-2">{title}</h3>
+        <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
+          {description}
+        </p>
+      </Link>
+    </motion.div>
   );
 };
 
 export const Dashboard: React.FC = () => {
   const { isDarkMode } = useThemeStore();
   const { user } = useAuthStore();
+  const { deals, sharks } = useDealsStore();
+
+  const stats = [
+    {
+      title: 'Total Deals',
+      value: deals.length.toString(),
+      change: '+12%',
+      icon: <Target className="h-6 w-6 text-white" />,
+      color: 'from-blue-500 to-cyan-500',
+      trend: 'up' as const,
+    },
+    {
+      title: 'Active Sharks',
+      value: sharks.length.toString(),
+      change: '+5%',
+      icon: <Users className="h-6 w-6 text-white" />,
+      color: 'from-purple-500 to-pink-500',
+      trend: 'up' as const,
+    },
+    {
+      title: 'Success Rate',
+      value: '68%',
+      change: '+8%',
+      icon: <Award className="h-6 w-6 text-white" />,
+      color: 'from-green-500 to-emerald-500',
+      trend: 'up' as const,
+    },
+    {
+      title: 'Total Investment',
+      value: '₹500Cr+',
+      change: '+25%',
+      icon: <DollarSign className="h-6 w-6 text-white" />,
+      color: 'from-orange-500 to-red-500',
+      trend: 'up' as const,
+    },
+  ];
 
   const cards = [
     {
-      title: 'Analytics Overview',
-      description: 'Comprehensive insights into deal patterns and investment trends',
+      title: 'Analytics Hub',
+      description: 'Comprehensive insights into deal patterns, investment trends, and market analysis',
       icon: <BarChart2 className="h-6 w-6 text-white" />,
       link: '/analytics',
-      color: 'bg-blue-500',
+      color: 'from-blue-500 to-cyan-500',
+      badge: 'Popular',
     },
     {
       title: 'Shark Profiles',
-      description: 'Detailed analysis of each shark\'s investment strategy',
+      description: 'Deep dive into each shark\'s investment strategy, preferences, and success stories',
       icon: <Users className="h-6 w-6 text-white" />,
       link: '/sharks',
-      color: 'bg-green-500',
+      color: 'from-purple-500 to-pink-500',
     },
     {
-      title: 'Deal Insights',
-      description: 'Track and analyze successful deals and negotiations',
+      title: 'Deal Intelligence',
+      description: 'Track and analyze successful deals, negotiations, and startup journeys',
       icon: <TrendingUp className="h-6 w-6 text-white" />,
       link: '/deals',
-      color: 'bg-purple-500',
+      color: 'from-green-500 to-emerald-500',
     },
     {
-      title: 'Deal Table',
-      description: 'Comprehensive database of all Shark Tank India deals',
+      title: 'Deal Database',
+      description: 'Comprehensive searchable database of all Shark Tank India deals and pitches',
       icon: <Table className="h-6 w-6 text-white" />,
       link: '/deal-table',
-      color: 'bg-orange-500',
+      color: 'from-indigo-500 to-purple-500',
     },
     {
-      title: 'Predictions',
-      description: 'AI-powered insights for future investment trends',
+      title: 'AI Predictions',
+      description: 'Machine learning powered insights for future investment trends and opportunities',
       icon: <Activity className="h-6 w-6 text-white" />,
       link: '/predictions',
-      color: 'bg-red-500',
+      color: 'from-pink-500 to-rose-500',
+      badge: 'AI Powered',
+    },
+    {
+      title: 'Market Insights',
+      description: 'Industry trends, startup ecosystem analysis, and investment pattern recognition',
+      icon: <Eye className="h-6 w-6 text-white" />,
+      link: '/insights',
+      color: 'from-teal-500 to-cyan-500',
     },
   ];
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className={`text-3xl font-bold ${
-          isDarkMode ? 'text-[#E0E0E0]' : 'text-[#5D87FF]'
-        }`}>
-          Dashboard
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-12"
+      >
+        <h1 className={`text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent`}>
+          Welcome to Tank Time Capsule
         </h1>
-        <SeasonSelector />
-      </div>
+        <p className={`text-xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} max-w-3xl mx-auto`}>
+          Dive deep into Shark Tank India analytics with AI-powered insights, comprehensive data analysis, and real-time market intelligence.
+        </p>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card) => (
-          <DashboardCard key={card.title} {...card} />
-        ))}
-      </div>
-
-      {/* ML Insights Section */}
-      <MLInsights />
-
-      {/* Premium Features Section */}
-      <PremiumFeatures />
-
-      {!user && (
-        <div className="mt-8 p-6 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Premium Features
-          </h2>
-          <p className="text-white mb-4">
-            Sign up to unlock exclusive features:
-          </p>
-          <ul className="text-white space-y-2 mb-6">
-            <li>• Advanced analytics and predictions</li>
-            <li>• Personalized investment insights</li>
-            <li>• Custom reports and exports</li>
-            <li>• Early access to new features</li>
-          </ul>
-          <Link
-            to="/auth"
-            className="inline-block px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-opacity-90 transition-colors"
+      {/* Stats Grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * index }}
           >
-            Get Started
-          </Link>
-        </div>
+            <StatCard {...stat} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Main Cards Grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {cards.map((card, index) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * index }}
+          >
+            <DashboardCard {...card} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Premium CTA */}
+      {!user && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mt-12 p-8 rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-2xl"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <Sparkles className="h-6 w-6" />
+                <h2 className="text-2xl font-bold">Unlock Premium Features</h2>
+              </div>
+              <p className="text-lg opacity-90 mb-6 max-w-2xl">
+                Get access to advanced analytics, AI predictions, custom reports, and exclusive insights that give you the edge in understanding Shark Tank India's ecosystem.
+              </p>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>AI-powered investment predictions</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Personalized market insights</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Custom analytics reports</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Early access to new features</span>
+                </li>
+              </ul>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link
+                to="/auth"
+                className="inline-flex items-center space-x-2 px-8 py-4 bg-white text-purple-600 rounded-2xl font-bold hover:bg-gray-100 transition-colors shadow-lg"
+              >
+                <Sparkles className="h-5 w-5" />
+                <span>Get Started Free</span>
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
       )}
+
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className={`p-6 rounded-3xl backdrop-blur-xl border ${
+          isDarkMode 
+            ? 'bg-gray-800/50 border-gray-700/50' 
+            : 'bg-white/50 border-gray-200/50'
+        } shadow-xl`}
+      >
+        <h2 className="text-2xl font-bold mb-6">Recent Market Activity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className={`p-4 rounded-2xl ${
+            isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+          }`}>
+            <h3 className="font-semibold mb-2">Latest Deal</h3>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              TechInnovate secured ₹2Cr from Ashneer Grover for 8% equity
+            </p>
+          </div>
+          <div className={`p-4 rounded-2xl ${
+            isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+          }`}>
+            <h3 className="font-semibold mb-2">Trending Industry</h3>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              D2C brands showing 45% higher success rate this season
+            </p>
+          </div>
+          <div className={`p-4 rounded-2xl ${
+            isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+          }`}>
+            <h3 className="font-semibold mb-2">AI Prediction</h3>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Healthcare startups predicted to dominate next quarter
+            </p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };
