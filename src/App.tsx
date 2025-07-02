@@ -23,17 +23,40 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { isDarkMode } = useThemeStore();
   const { fetchDeals, fetchSharks, fetchPredictions, fetchInsights } = useDealsStore();
-  const { fetchProfile } = useAuthStore();
+  const { initialize, initialized } = useAuthStore();
 
   useEffect(() => {
-    fetchDeals();
-    fetchSharks();
-    fetchPredictions();
-    fetchInsights();
-    fetchProfile();
-  }, [fetchDeals, fetchSharks, fetchPredictions, fetchInsights, fetchProfile]);
+    const initializeApp = async () => {
+      try {
+        await initialize();
+        await Promise.all([
+          fetchDeals(),
+          fetchSharks(),
+          fetchPredictions(),
+          fetchInsights(),
+        ]);
+      } catch (error) {
+        console.error('App initialization error:', error);
+      }
+    };
+
+    initializeApp();
+  }, [initialize, fetchDeals, fetchSharks, fetchPredictions, fetchInsights]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  if (!initialized) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${
+        isDarkMode ? 'bg-[#121212] text-[#E0E0E0]' : 'bg-[#F5F5F5] text-[#5D87FF]'
+      }`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-xl">Loading Tank Time Capsule...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>
