@@ -88,7 +88,7 @@ import {
   Edit,
   Copy,
   Clipboard,
-  Link,
+  Link as LinkIcon,
   ExternalLink,
   Mail,
   Phone,
