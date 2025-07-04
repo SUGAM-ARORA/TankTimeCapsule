@@ -56,7 +56,6 @@ import {
   Headphones,
   Coffee,
   Flame,
-  Thunderbolt,
   Diamond,
   Gem,
   Palette,
@@ -539,7 +538,7 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ isOpen, 
       new: true
     },
     { 
-      icon: Thunderbolt, 
+      icon: Zap, 
       label: 'Quick Insights', 
       path: '/quick-insights', 
       color: 'from-yellow-500 to-orange-500',
