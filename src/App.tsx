@@ -15,11 +15,47 @@ import { Trends } from './pages/Trends';
 import { Startups } from './pages/Startups';
 import { Industries } from './pages/Industries';
 import { Comparisons } from './pages/Comparisons';
+import { GlobalMarkets } from './pages/GlobalMarkets';
+import { PitchAnalyzer } from './pages/PitchAnalyzer';
+import { SharkChat } from './pages/SharkChat';
+import { SuccessStories } from './pages/SuccessStories';
 import { LoadingScreen } from './components/LoadingScreen';
 import { useThemeStore } from './store/useThemeStore';
 import { useDealsStore } from './store/useDealsStore';
 import { useAuthStore } from './store/useAuthStore';
 import { motion } from 'framer-motion';
+
+// Placeholder components for new features
+const PlaceholderPage: React.FC<{ title: string; description: string }> = ({ title, description }) => {
+  const { isDarkMode } = useThemeStore();
+  
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className={`text-center p-12 rounded-3xl ${
+          isDarkMode ? 'bg-slate-800/50' : 'bg-white'
+        } shadow-xl backdrop-blur-xl border ${
+          isDarkMode ? 'border-slate-700/50' : 'border-gray-200/50'
+        }`}
+      >
+        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+          <span className="text-3xl">🚀</span>
+        </div>
+        <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+          {title}
+        </h1>
+        <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
+          {description}
+        </p>
+        <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-semibold">
+          Coming Soon
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 function App() {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -64,7 +100,7 @@ function App() {
           ? 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white' 
           : 'bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-900'
       }`}>
-        {/* Optimized Background Elements - Reduced for mobile performance */}
+        {/* Optimized Background Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{
@@ -118,9 +154,31 @@ function App() {
               <Route path="/startups" element={<Startups />} />
               <Route path="/industries" element={<Industries />} />
               <Route path="/comparisons" element={<Comparisons />} />
+              <Route path="/global-markets" element={<GlobalMarkets />} />
+              <Route path="/pitch-analyzer" element={<PitchAnalyzer />} />
+              <Route path="/shark-chat" element={<SharkChat />} />
+              <Route path="/success-stories" element={<SuccessStories />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<div>Settings Coming Soon</div>} />
+              
+              {/* New Feature Placeholders */}
+              <Route path="/pitch-simulator" element={<PlaceholderPage title="Pitch Simulator" description="Practice your pitch with AI-powered feedback and realistic shark responses" />} />
+              <Route path="/live-episodes" element={<PlaceholderPage title="Live Episodes" description="Real-time tracking and analysis of ongoing Shark Tank episodes" />} />
+              <Route path="/pitch-library" element={<PlaceholderPage title="Pitch Library" description="Comprehensive video collection of successful and failed pitches" />} />
+              <Route path="/voice-analytics" element={<PlaceholderPage title="Voice Analytics" description="Advanced speech pattern analysis for pitch optimization" />} />
+              <Route path="/events" element={<PlaceholderPage title="Event Calendar" description="Startup events, pitch competitions, and networking opportunities" />} />
+              <Route path="/learning" element={<PlaceholderPage title="Learning Hub" description="Educational content, courses, and masterclasses for entrepreneurs" />} />
+              <Route path="/ratings" element={<PlaceholderPage title="Rating System" description="Community-driven scoring and feedback platform" />} />
+              <Route path="/risk-analyzer" element={<PlaceholderPage title="Risk Analyzer" description="AI-powered investment risk assessment and mitigation strategies" />} />
+              <Route path="/portfolio" element={<PlaceholderPage title="Portfolio Tracker" description="Track and manage your investment portfolio with advanced analytics" />} />
+              <Route path="/market-navigator" element={<PlaceholderPage title="Market Navigator" description="Discover emerging markets and investment opportunities" />} />
+              <Route path="/data-layers" element={<PlaceholderPage title="Data Layers" description="Multi-dimensional data visualization and analysis tools" />} />
+              <Route path="/trending" element={<PlaceholderPage title="Trending Now" description="Real-time trending topics and hot investment opportunities" />} />
+              <Route path="/premium-analytics" element={<PlaceholderPage title="Premium Analytics" description="Advanced insights and exclusive data for premium subscribers" />} />
+              <Route path="/quick-insights" element={<PlaceholderPage title="Quick Insights" description="Instant analysis and bite-sized market intelligence" />} />
+              <Route path="/ecosystem-map" element={<PlaceholderPage title="Ecosystem Map" description="Visual representation of the startup ecosystem and connections" />} />
+              
+              <Route path="/settings" element={<PlaceholderPage title="Settings" description="Customize your experience and manage preferences" />} />
             </Routes>
           </div>
         </motion.main>
