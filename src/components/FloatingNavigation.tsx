@@ -251,7 +251,6 @@ import {
   Cordoba,
   Quetzal,
   Lempira,
-  Colon,
   Sucre,
   Bolivar,
   Guarani,
