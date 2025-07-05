@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { excelParser, DealData, SharkData } from '../lib/excelParser';
+import { csvParser, DealData, SharkData } from '../lib/csvParser';
 
 interface DealsStore {
   deals: DealData[];
@@ -27,6 +27,7 @@ interface DealsStore {
   getIndustries: () => string[];
   getSeasons: () => number[];
   getFilteredDeals: (filters: any) => DealData[];
+  getSharkComparison: (shark1: string, shark2: string) => any;
 }
 
 const samplePredictions = [
@@ -133,7 +134,7 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      await excelParser.loadExcelData();
+      await csvParser.loadCSVData();
       await Promise.all([
         get().fetchDeals(),
         get().fetchSharks(),
@@ -151,8 +152,8 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
 
   fetchDeals: async () => {
     try {
-      const deals = excelParser.getDeals();
-      const analytics = excelParser.getAnalytics();
+      const deals = csvParser.getDeals();
+      const analytics = csvParser.getAnalytics();
       set({ deals, analytics, error: null });
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -162,7 +163,7 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
 
   fetchSharks: async () => {
     try {
-      const sharks = excelParser.getSharks();
+      const sharks = csvParser.getSharks();
       set({ sharks, error: null });
     } catch (error) {
       console.error('Error fetching sharks:', error);
@@ -174,12 +175,12 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
     try {
       // Enhanced predictions based on real data
       const { deals } = get();
-      const industries = excelParser.getIndustries();
+      const industries = csvParser.getIndustries();
       
       const enhancedPredictions = industries.map((industry, index) => {
         const industryDeals = deals.filter(deal => deal.industry === industry);
         const successRate = industryDeals.length > 0 
-          ? industryDeals.filter(deal => deal.success_status === 'funded').length / industryDeals.length 
+          ? industryDeals.filter(deal => deal.success_status === 'funded' || deal.deal_amount !== null).length / industryDeals.length 
           : 0.5;
         
         const avgValuation = industryDeals.length > 0
@@ -209,12 +210,12 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
     try {
       // Generate insights based on real data
       const { deals } = get();
-      const industries = excelParser.getIndustries();
+      const industries = csvParser.getIndustries();
       
       const enhancedInsights = industries.slice(0, 3).map((industry, index) => {
         const industryDeals = deals.filter(deal => deal.industry === industry);
         const successRate = industryDeals.length > 0 
-          ? industryDeals.filter(deal => deal.success_status === 'funded').length / industryDeals.length 
+          ? industryDeals.filter(deal => deal.success_status === 'funded' || deal.deal_amount !== null).length / industryDeals.length 
           : 0.5;
         
         const avgValuation = industryDeals.length > 0
@@ -275,5 +276,39 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
       if (filters.maxValuation && deal.valuation > filters.maxValuation) return false;
       return true;
     });
+  },
+
+  getSharkComparison: (shark1: string, shark2: string) => {
+    const { sharks, deals } = get();
+    const sharkData1 = sharks.find(s => s.name === shark1);
+    const sharkData2 = sharks.find(s => s.name === shark2);
+    
+    if (!sharkData1 || !sharkData2) return null;
+
+    const shark1Deals = deals.filter(deal => deal.invested_sharks.includes(shark1));
+    const shark2Deals = deals.filter(deal => deal.invested_sharks.includes(shark2));
+
+    return {
+      shark1: {
+        ...sharkData1,
+        deals: shark1Deals,
+        industries: [...new Set(shark1Deals.map(d => d.industry))],
+        avgDealSize: shark1Deals.length > 0 ? sharkData1.total_investment / shark1Deals.length : 0,
+      },
+      shark2: {
+        ...sharkData2,
+        deals: shark2Deals,
+        industries: [...new Set(shark2Deals.map(d => d.industry))],
+        avgDealSize: shark2Deals.length > 0 ? sharkData2.total_investment / shark2Deals.length : 0,
+      },
+      comparison: {
+        totalDealsComparison: sharkData1.total_deals - sharkData2.total_deals,
+        totalInvestmentComparison: sharkData1.total_investment - sharkData2.total_investment,
+        successRateComparison: (sharkData1.success_rate || 0) - (sharkData2.success_rate || 0),
+        commonIndustries: [...new Set(shark1Deals.map(d => d.industry))].filter(industry =>
+          [...new Set(shark2Deals.map(d => d.industry))].includes(industry)
+        ),
+      }
+    };
   },
 }));
