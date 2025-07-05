@@ -60,26 +60,21 @@ const PlaceholderPage: React.FC<{ title: string; description: string }> = ({ tit
 function App() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { isDarkMode } = useThemeStore();
-  const { fetchDeals, fetchSharks, fetchPredictions, fetchInsights } = useDealsStore();
+  const { initializeData, isInitialized } = useDealsStore();
   const { initialize, initialized } = useAuthStore();
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
         await initialize();
-        await Promise.all([
-          fetchDeals(),
-          fetchSharks(),
-          fetchPredictions(),
-          fetchInsights(),
-        ]);
+        await initializeData();
       } catch (error) {
         console.error('App initialization error:', error);
       }
     };
 
     initializeApp();
-  }, [initialize, fetchDeals, fetchSharks, fetchPredictions, fetchInsights]);
+  }, [initialize, initializeData]);
 
   const toggleNav = useCallback(() => {
     setIsNavOpen(prev => !prev);
@@ -89,7 +84,7 @@ function App() {
     setIsNavOpen(false);
   }, []);
 
-  if (!initialized) {
+  if (!initialized || !isInitialized) {
     return <LoadingScreen />;
   }
 
@@ -177,6 +172,8 @@ function App() {
               <Route path="/premium-analytics" element={<PlaceholderPage title="Premium Analytics" description="Advanced insights and exclusive data for premium subscribers" />} />
               <Route path="/quick-insights" element={<PlaceholderPage title="Quick Insights" description="Instant analysis and bite-sized market intelligence" />} />
               <Route path="/ecosystem-map" element={<PlaceholderPage title="Ecosystem Map" description="Visual representation of the startup ecosystem and connections" />} />
+              <Route path="/data-explorer" element={<PlaceholderPage title="Data Explorer" description="Advanced data mining and exploration tools" />} />
+              <Route path="/api-playground" element={<PlaceholderPage title="API Playground" description="Developer tools and API testing environment" />} />
               
               <Route path="/settings" element={<PlaceholderPage title="Settings" description="Customize your experience and manage preferences" />} />
             </Routes>
