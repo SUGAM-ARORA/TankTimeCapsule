@@ -16,7 +16,7 @@ import {
   Eye
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useThemeStore } from '../store/useThemeStore';
+import { useSharkTankTheme } from '../hooks/useSharkTankTheme';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDealsStore } from '../store/useDealsStore';
 
@@ -28,15 +28,15 @@ const StatCard: React.FC<{
   color: string;
   trend: 'up' | 'down';
 }> = React.memo(({ title, value, change, icon, color, trend }) => {
-  const { isDarkMode } = useThemeStore();
+  const { theme, isDarkMode } = useSharkTankTheme();
 
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
       className={`p-4 md:p-6 rounded-2xl md:rounded-3xl backdrop-blur-xl border transition-all duration-300 ${
         isDarkMode 
-          ? 'bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50' 
-          : 'bg-white/50 border-gray-200/50 hover:border-gray-300/50'
+          ? 'bg-shark-navy-800/50 border-shark-navy-700/50 hover:border-shark-navy-600/50' 
+          : 'bg-white/50 border-shark-navy-200/50 hover:border-shark-navy-300/50'
       } shadow-xl hover:shadow-2xl`}
     >
       <div className="flex items-center justify-between mb-3 md:mb-4">
@@ -52,7 +52,7 @@ const StatCard: React.FC<{
           <span>{change}</span>
         </div>
       </div>
-      <h3 className={`text-xs md:text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+      <h3 className={`text-xs md:text-sm font-medium ${isDarkMode ? 'text-shark-navy-400' : 'text-shark-navy-600'}`}>
         {title}
       </h3>
       <p className="text-xl md:text-3xl font-bold mt-1">{value}</p>
@@ -68,7 +68,7 @@ const DashboardCard: React.FC<{
   color: string;
   badge?: string;
 }> = React.memo(({ title, description, icon, link, color, badge }) => {
-  const { isDarkMode } = useThemeStore();
+  const { isDarkMode } = useSharkTankTheme();
 
   return (
     <motion.div
@@ -80,8 +80,8 @@ const DashboardCard: React.FC<{
         to={link}
         className={`block p-4 md:p-6 rounded-2xl md:rounded-3xl backdrop-blur-xl border transition-all duration-300 ${
           isDarkMode 
-            ? 'bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50' 
-            : 'bg-white/50 border-gray-200/50 hover:border-gray-300/50'
+            ? 'bg-shark-navy-800/50 border-shark-navy-700/50 hover:border-shark-navy-600/50' 
+            : 'bg-white/50 border-shark-navy-200/50 hover:border-shark-navy-300/50'
         } shadow-xl hover:shadow-2xl relative overflow-hidden`}
       >
         {/* Background gradient effect */}
@@ -92,7 +92,7 @@ const DashboardCard: React.FC<{
             {icon}
           </div>
           {badge && (
-            <span className="px-2 md:px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full">
+            <span className="px-2 md:px-3 py-1 bg-gradient-to-r from-shark-yellow-400 to-shark-yellow-500 text-white text-xs font-semibold rounded-full">
               {badge}
             </span>
           )}
@@ -105,7 +105,7 @@ const DashboardCard: React.FC<{
         </div>
         
         <h3 className="text-lg md:text-xl font-bold mb-2">{title}</h3>
-        <p className={`text-sm md:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
+        <p className={`text-sm md:text-base ${isDarkMode ? 'text-shark-navy-400' : 'text-shark-navy-600'} leading-relaxed`}>
           {description}
         </p>
       </Link>
@@ -114,7 +114,7 @@ const DashboardCard: React.FC<{
 });
 
 export const Dashboard: React.FC = () => {
-  const { isDarkMode } = useThemeStore();
+  const { theme, isDarkMode, getGradientClass } = useSharkTankTheme();
   const { user } = useAuthStore();
   const { deals, sharks, analytics, initializeData } = useDealsStore();
 
@@ -130,7 +130,7 @@ export const Dashboard: React.FC = () => {
           value: deals.length.toString(),
           change: '+12%',
           icon: <Target className="h-4 w-4 md:h-6 md:w-6 text-white" />,
-          color: 'from-blue-500 to-cyan-500',
+          color: 'from-shark-blue-500 to-shark-cyan-500',
           trend: 'up' as const,
         },
         {
@@ -138,7 +138,7 @@ export const Dashboard: React.FC = () => {
           value: sharks.length.toString(),
           change: '+5%',
           icon: <Users className="h-4 w-4 md:h-6 md:w-6 text-white" />,
-          color: 'from-purple-500 to-pink-500',
+          color: 'from-shark-navy-500 to-shark-blue-500',
           trend: 'up' as const,
         },
         {
@@ -154,7 +154,7 @@ export const Dashboard: React.FC = () => {
           value: '₹500Cr+',
           change: '+25%',
           icon: <DollarSign className="h-4 w-4 md:h-6 md:w-6 text-white" />,
-          color: 'from-orange-500 to-red-500',
+          color: 'from-shark-yellow-500 to-orange-500',
           trend: 'up' as const,
         },
       ];
@@ -166,7 +166,7 @@ export const Dashboard: React.FC = () => {
         value: analytics.totalDeals.toString(),
         change: '+12%',
         icon: <Target className="h-4 w-4 md:h-6 md:w-6 text-white" />,
-        color: 'from-blue-500 to-cyan-500',
+        color: 'from-shark-blue-500 to-shark-cyan-500',
         trend: 'up' as const,
       },
       {
@@ -174,7 +174,7 @@ export const Dashboard: React.FC = () => {
         value: analytics.sharksCount.toString(),
         change: '+5%',
         icon: <Users className="h-4 w-4 md:h-6 md:w-6 text-white" />,
-        color: 'from-purple-500 to-pink-500',
+        color: 'from-shark-navy-500 to-shark-blue-500',
         trend: 'up' as const,
       },
       {
@@ -190,7 +190,7 @@ export const Dashboard: React.FC = () => {
         value: `₹${(analytics.totalInvestment / 10000000).toFixed(0)}Cr+`,
         change: '+25%',
         icon: <DollarSign className="h-4 w-4 md:h-6 md:w-6 text-white" />,
-        color: 'from-orange-500 to-red-500',
+        color: 'from-shark-yellow-500 to-orange-500',
         trend: 'up' as const,
       },
     ];
@@ -202,7 +202,7 @@ export const Dashboard: React.FC = () => {
       description: 'Comprehensive insights into deal patterns, investment trends, and market analysis',
       icon: <BarChart2 className="h-4 w-4 md:h-6 md:w-6 text-white" />,
       link: '/analytics',
-      color: 'from-blue-500 to-cyan-500',
+      color: 'from-shark-blue-500 to-shark-cyan-500',
       badge: 'Popular',
     },
     {
@@ -210,7 +210,7 @@ export const Dashboard: React.FC = () => {
       description: 'Deep dive into each shark\'s investment strategy, preferences, and success stories',
       icon: <Users className="h-4 w-4 md:h-6 md:w-6 text-white" />,
       link: '/sharks',
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-shark-navy-500 to-shark-blue-500',
     },
     {
       title: 'Deal Intelligence',
@@ -239,22 +239,61 @@ export const Dashboard: React.FC = () => {
       description: 'Industry trends, startup ecosystem analysis, and investment pattern recognition',
       icon: <Eye className="h-4 w-4 md:h-6 md:w-6 text-white" />,
       link: '/insights',
-      color: 'from-teal-500 to-cyan-500',
+      color: 'from-shark-cyan-500 to-shark-blue-500',
     },
   ], []);
 
   return (
     <div className="space-y-6 md:space-y-8 px-4 md:px-0">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className={`absolute -top-40 -right-40 w-72 h-72 md:w-96 md:h-96 rounded-full ${
+            isDarkMode ? 'bg-gradient-to-r from-shark-blue-500/20 to-shark-cyan-500/20' : 'bg-gradient-to-r from-shark-blue-200/40 to-shark-cyan-200/40'
+          } blur-3xl`}
+        />
+        <motion.div
+          animate={{
+            scale: [1.1, 1, 1.1],
+            opacity: [0.4, 0.6, 0.4],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className={`absolute -bottom-40 -left-40 w-80 h-80 md:w-[500px] md:h-[500px] rounded-full ${
+            isDarkMode ? 'bg-gradient-to-r from-shark-navy-500/20 to-shark-yellow-500/20' : 'bg-gradient-to-r from-shark-navy-200/40 to-shark-yellow-200/40'
+          } blur-3xl`}
+        />
+      </div>
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8 md:mb-12"
+        className="text-center mb-8 md:mb-12 relative z-10"
       >
-        <h1 className={`text-3xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent`}>
+        <h1 className={`text-3xl md:text-5xl font-bold mb-3 md:mb-4`}
+          style={{
+            background: 'linear-gradient(135deg, #1e3a8a 0%, #06b6d4 50%, #fcd34d 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}
+        >
           Welcome to Tank Time Capsule
         </h1>
-        <p className={`text-base md:text-xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} max-w-3xl mx-auto px-4`}>
+        <p className={`text-base md:text-xl ${isDarkMode ? 'text-shark-navy-400' : 'text-shark-navy-600'} max-w-3xl mx-auto px-4`}>
           Dive deep into Shark Tank India analytics with AI-powered insights, comprehensive data analysis, and real-time market intelligence.
         </p>
       </motion.div>
@@ -264,7 +303,7 @@ export const Dashboard: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 relative z-10"
       >
         {stats.map((stat, index) => (
           <motion.div
@@ -283,7 +322,7 @@ export const Dashboard: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 relative z-10"
       >
         {cards.map((card, index) => (
           <motion.div
@@ -303,7 +342,7 @@ export const Dashboard: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-8 md:mt-12 p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-2xl"
+          className="mt-8 md:mt-12 p-6 md:p-8 rounded-2xl md:rounded-3xl bg-gradient-to-r from-shark-blue-600 via-shark-navy-600 to-shark-cyan-600 text-white shadow-2xl relative z-10"
         >
           <div className="flex flex-col lg:flex-row items-center justify-between space-y-6 lg:space-y-0">
             <div className="text-center lg:text-left">
@@ -339,7 +378,7 @@ export const Dashboard: React.FC = () => {
             >
               <Link
                 to="/auth"
-                className="inline-flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-white text-purple-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-100 transition-colors shadow-lg"
+                className="inline-flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-white text-shark-blue-600 rounded-xl md:rounded-2xl font-bold hover:bg-gray-100 transition-colors shadow-lg"
               >
                 <Sparkles className="h-4 w-4 md:h-5 md:w-5" />
                 <span>Get Started Free</span>
@@ -357,33 +396,33 @@ export const Dashboard: React.FC = () => {
         transition={{ delay: 0.8 }}
         className={`p-4 md:p-6 rounded-2xl md:rounded-3xl backdrop-blur-xl border ${
           isDarkMode 
-            ? 'bg-gray-800/50 border-gray-700/50' 
-            : 'bg-white/50 border-gray-200/50'
-        } shadow-xl`}
+            ? 'bg-shark-navy-800/50 border-shark-navy-700/50' 
+            : 'bg-white/50 border-shark-navy-200/50'
+        } shadow-xl relative z-10`}
       >
         <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Recent Market Activity</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl ${
-            isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+            isDarkMode ? 'bg-shark-navy-700/50' : 'bg-shark-navy-100/50'
           }`}>
             <h3 className="font-semibold mb-2 text-sm md:text-base">Latest Deal</h3>
-            <p className={`text-xs md:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xs md:text-sm ${isDarkMode ? 'text-shark-navy-400' : 'text-shark-navy-600'}`}>
               {deals.length > 0 ? `${deals[0].startup_name} secured ₹${(deals[0].deal_amount || 0) / 10000000}Cr` : 'Loading latest deals...'}
             </p>
           </div>
           <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl ${
-            isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+            isDarkMode ? 'bg-shark-navy-700/50' : 'bg-shark-navy-100/50'
           }`}>
             <h3 className="font-semibold mb-2 text-sm md:text-base">Trending Industry</h3>
-            <p className={`text-xs md:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xs md:text-sm ${isDarkMode ? 'text-shark-navy-400' : 'text-shark-navy-600'}`}>
               {analytics ? `${analytics.successRate.toFixed(0)}% success rate this season` : 'Analyzing trends...'}
             </p>
           </div>
           <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl ${
-            isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+            isDarkMode ? 'bg-shark-navy-700/50' : 'bg-shark-navy-100/50'
           }`}>
             <h3 className="font-semibold mb-2 text-sm md:text-base">AI Prediction</h3>
-            <p className={`text-xs md:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xs md:text-sm ${isDarkMode ? 'text-shark-navy-400' : 'text-shark-navy-600'}`}>
               Healthcare startups predicted to dominate next quarter
             </p>
           </div>

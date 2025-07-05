@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { excelParser, DealData, SharkData } from '../lib/excelParser';
+import { csvParser, DealData, SharkData } from '../lib/csvParser';
 
 interface DealsStore {
   deals: DealData[];
@@ -27,6 +27,7 @@ interface DealsStore {
   getIndustries: () => string[];
   getSeasons: () => number[];
   getFilteredDeals: (filters: any) => DealData[];
+  getSharkComparison: (shark1: string, shark2: string) => any;
 }
 
 const samplePredictions = [
@@ -133,7 +134,7 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      await excelParser.loadExcelData();
+      await csvParser.loadCSVData();
       await Promise.all([
         get().fetchDeals(),
         get().fetchSharks(),
@@ -151,8 +152,8 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
 
   fetchDeals: async () => {
     try {
-      const deals = excelParser.getDeals();
-      const analytics = excelParser.getAnalytics();
+      const deals = csvParser.getDeals();
+      const analytics = csvParser.getAnalytics();
       set({ deals, analytics, error: null });
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -162,7 +163,7 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
 
   fetchSharks: async () => {
     try {
-      const sharks = excelParser.getSharks();
+      const sharks = csvParser.getSharks();
       set({ sharks, error: null });
     } catch (error) {
       console.error('Error fetching sharks:', error);
@@ -174,7 +175,7 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
     try {
       // Enhanced predictions based on real data
       const { deals } = get();
-      const industries = excelParser.getIndustries();
+      const industries = csvParser.getIndustries();
       
       const enhancedPredictions = industries.map((industry, index) => {
         const industryDeals = deals.filter(deal => deal.industry === industry);
@@ -209,7 +210,7 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
     try {
       // Generate insights based on real data
       const { deals } = get();
-      const industries = excelParser.getIndustries();
+      const industries = csvParser.getIndustries();
       
       const enhancedInsights = industries.slice(0, 3).map((industry, index) => {
         const industryDeals = deals.filter(deal => deal.industry === industry);
@@ -275,5 +276,9 @@ export const useDealsStore = create<DealsStore>((set, get) => ({
       if (filters.maxValuation && deal.valuation > filters.maxValuation) return false;
       return true;
     });
+  },
+
+  getSharkComparison: (shark1: string, shark2: string) => {
+    return csvParser.getSharkComparison(shark1, shark2);
   },
 }));
