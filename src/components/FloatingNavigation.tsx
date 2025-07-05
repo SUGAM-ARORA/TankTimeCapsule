@@ -87,7 +87,6 @@ import {
   Edit,
   Copy,
   Clipboard,
-  Link as LinkIcon,
   ExternalLink,
   Mail,
   Phone,
@@ -123,7 +122,6 @@ import {
   Bike,
   Scooter,
   Skateboard,
-  Roller,
   Footprints,
   Navigation,
   Route,
@@ -147,7 +145,6 @@ import {
   Calculator,
   Scale,
   Ruler,
-  Scissors as ScissorsIcon,
   PenTool,
   Paintbrush,
   Eraser,
@@ -166,7 +163,6 @@ import {
   Key,
   Lock,
   Unlock,
-  Shield as ShieldIcon,
   ShieldCheck,
   ShieldAlert,
   ShieldX,
@@ -203,83 +199,7 @@ import {
   Dollar,
   Euro,
   Pound,
-  Yen,
-  Ruble,
-  Rupee,
-  Won,
-  Shekel,
-  Franc,
-  Peso,
-  Real,
-  Lira,
-  Dinar,
-  Dirham,
-  Riyal,
-  Baht,
-  Dong,
-  Kip,
-  Tugrik,
-  Som,
-  Manat,
-  Lari,
-  Dram,
-  Tenge,
-  Riel,
-  Kyat,
-  Afghani,
-  Birr,
-  Cedi,
-  Dalasi,
-  Nakfa,
-  Rand,
-  Pula,
-  Lilangeni,
-  Maloti,
-  Ariary,
-  Ouguiya,
-  Kwacha,
-  Kwanza,
-  Dobra,
-  Leone,
-  Cedi as CediIcon,
-  Naira,
-  Escudo,
-  Metical,
-  Pataca,
-  Balboa,
-  Cordoba,
-  Quetzal,
-  Lempira,
-  Sucre,
-  Bolivar,
-  Guarani,
-  Sol,
-  Boliviano,
-  Peso as PesoIcon,
-  Austral,
-  Cruzeiro,
-  Cruzado,
-  Milreis,
-  Contos,
-  Escudos,
-  Centavos,
-  Centimos,
-  Centesimos,
-  Centesimas,
-  Centenas,
-  Decenas,
-  Unidades,
-  Millares,
-  Millones,
-  Billones,
-  Trillones,
-  Cuatrillones,
-  Quintillones,
-  Sextillones,
-  Septillones,
-  Octillones,
-  Nonillones,
-  Decillones
+  Yen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useThemeStore } from '../store/useThemeStore';
@@ -554,6 +474,26 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ isOpen, 
       description: 'Startup Ecosystem',
       category: 'Visualization',
       new: true
+    },
+    { 
+      icon: Database, 
+      label: 'Data Explorer', 
+      path: '/data-explorer', 
+      color: 'from-indigo-500 to-blue-500',
+      description: 'Advanced Data Mining',
+      premium: true,
+      category: 'Data',
+      new: true
+    },
+    { 
+      icon: Code, 
+      label: 'API Playground', 
+      path: '/api-playground', 
+      color: 'from-gray-500 to-slate-500',
+      description: 'Developer Tools',
+      premium: true,
+      category: 'Developer',
+      new: true
     }
   ], []);
 
@@ -620,7 +560,7 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ isOpen, 
             onClick={onClose}
           />
           
-          {/* Floating Navigation Panel - Full Screen on Mobile */}
+          {/* Floating Navigation Panel - Full Screen on Mobile with Proper Scrolling */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -634,7 +574,7 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ isOpen, 
             }`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200/20 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200/20 bg-gradient-to-r from-blue-500/10 to-purple-500/10 flex-shrink-0">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <Rocket className="h-5 w-5 md:h-6 md:w-6 text-white" />
@@ -663,8 +603,8 @@ export const FloatingNavigation: React.FC<FloatingNavigationProps> = ({ isOpen, 
               </motion.button>
             </div>
 
-            {/* Navigation Grid - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            {/* Navigation Grid - Properly Scrollable */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-6" style={{ maxHeight: 'calc(100vh - 200px)' }}>
               {/* Category Sections */}
               {categories.map((category, categoryIndex) => (
                 <motion.div
